@@ -1,0 +1,251 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="right"
+        android:layout_gravity="right" >
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="دوباره سازی"
+            android:layout_marginRight="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="1dp"
+            android:textSize="20sp"
+            android:textColor="#fff"
+            android:background="#2c3086"
+            android:onClick="btnREfresh" />
+        <TextView
+            android:id="@+id/txtRoozErsal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="روزهای ارسال"
+            android:textColor="#2c3086"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/AppMenuMailLayout"
+            style="@style/appMenuRows"
+            android:layout_marginTop="10dp">
+
+            <CheckBox
+                android:id="@+id/chkShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="شنبه"
+                android:gravity="left"
+                android:layout_gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+
+            <CheckBox
+                android:id="@+id/chkYekShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="یکشنبه"
+                android:gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/AppMenuMailLayout2"
+            style="@style/appMenuRows">
+
+            <CheckBox
+                android:id="@+id/chkDoShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="دوشنبه"
+                android:gravity="left"
+                android:layout_gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+
+            <CheckBox
+                android:id="@+id/chkSeShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="سه شنبه"
+                android:gravity="left"
+                android:layout_gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/AppMenuMailLayout3"
+            style="@style/appMenuRows">
+
+            <CheckBox
+                android:id="@+id/chkCharShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="چهارشنبه"
+                android:gravity="left"
+                android:layout_gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+
+            <CheckBox
+                android:id="@+id/chkPanjShabne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="پنجشنبه"
+                android:gravity="left"
+                android:layout_gravity="left"
+                android:textAlignment="gravity"
+                android:layout_marginTop="5dp"
+                android:textColor="#2c3086"
+                android:textSize="18sp"
+                style="@style/appMenuButton"
+                android:enabled="false"
+                android:focusable="false" />
+
+
+        </LinearLayout>
+
+
+
+
+
+        <CheckBox
+            android:id="@+id/chkJomeh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="جمعه"
+            android:gravity="left"
+            android:layout_gravity="left"
+            android:textAlignment="gravity"
+            android:layout_marginTop="5dp"
+            android:textColor="#2c3086"
+            android:textSize="18sp"
+            android:enabled="false"
+            android:focusable="false" />
+
+        <TextView
+            android:id="@+id/txtErsalAz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ارسال از ساعت"
+            android:textColor="#2c3086"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/edittextAzSaat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:singleLine="true"
+            android:enabled="false"
+            android:focusable="false">
+
+        </EditText>
+
+        <TextView
+            android:id="@+id/txtErsalTa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ارسال تا ساعت"
+            android:textColor="#2c3086"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/edittextTaSaat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:singleLine="true"
+            android:enabled="false"
+            android:focusable="false">
+
+        </EditText>
+
+
+        <TextView
+            android:id="@+id/txtSendServerTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="فاصله زمانی ارسال موقعیت مکانی به ثانیه"
+            android:textColor="#2c3086"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="5dp"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/edittextSendServerTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginLeft="30dp"
+            android:singleLine="true"
+            android:enabled="false"
+            android:focusable="false">
+
+        </EditText>
+
+    </LinearLayout>
+
+
+</ScrollView>

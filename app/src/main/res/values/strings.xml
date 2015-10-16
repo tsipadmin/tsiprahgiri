@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">نرم افزار رهگیری طراحان سامانه</string>
+
+    <string name="hello">لطفا به سایت tstracker.ir مراجعه کنید پس از ثبت نام دستگاه را اضافه کنید.</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_home">نرم افزار رهگیری طراحان سامانه ایده پویا</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_setting">تنظیمات</string>
+    <string name="title_activity_notification">NotificationActivity</string>
+    <string name="title_activity_about">about</string>
+    <string name="title_activity_map_pane">MapPane</string>
+</resources>
