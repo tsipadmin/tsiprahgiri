@@ -11,7 +11,7 @@ public class DatabaseHelper extends android.database.sqlite.SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
-        String s=" ll";
+
     }
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DatabaseContracts.Settings.SQL_CREATE_Table);
