@@ -28,86 +28,30 @@ import java.util.Map;
 
 public class MyAlarmManager extends BroadcastReceiver {
 
-    private String IsTimeToSend() {
-        DatabaseHelper dh = new DatabaseHelper(BackgroundService.context);
-        SQLiteDatabase db;
-        try {
-            db = dh.getReadableDatabase();
-            String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_endTime
-                    , DatabaseContracts.Settings.COLUMN_NAME_fromTime
-                    , DatabaseContracts.Settings.COLUMN_NAME_days};
-            Cursor c = db.query(DatabaseContracts.Settings.TABLE_NAME, columns, "", null, "", "", "");
-            c.moveToFirst();
-            try {
-                String days = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_days));
-                String EndTime = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_endTime));
-                String startTime = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_fromTime));
-
-                Calendar cal = Calendar.getInstance();
-                Date date = cal.getTime();
-                String datetime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(date);
-                //(String) DateFormat.format("yyyy-MM-dd HH:mm:ss",c );
-                Integer dayWeek = cal.get(Calendar.DAY_OF_WEEK);
-                int hourOfDay = Integer.valueOf(new SimpleDateFormat("k", Locale.US).format(date));
-
-                if (dayWeek == 7)//shanbe
-                    dayWeek = 0;
-                if (days.contains(String.valueOf(dayWeek)))//check day
-                    if (hourOfDay < Integer.valueOf(EndTime) && hourOfDay >= Integer.valueOf(startTime))//check hour
-                    {
-                        return datetime;
-                    }
-            } catch (Exception er) {
-                // txtResult.setText(er.getMessage());
-            }
-        } catch (Exception ex) {
-
-        }
-        return null;
-    }
-
-    public   void SaveLocation(Location location){
-
-        String Lat, Lon, alti, speed, coarse, datetime;
-        try {
-            Lat = String.valueOf(location.getLatitude());
-            Lon = String.valueOf(location.getLongitude());
-            alti = String.valueOf(location.getAltitude());
-            speed = String.valueOf(location.getSpeed());
-            coarse = "0";
-            datetime = IsTimeToSend();
-
-            if ( datetime != null  ) {
-                SaveGps s = new SaveGps(BackgroundService.context, Lat, Lon, alti, speed, coarse, datetime);
-//                    Toast.makeText(getApplicationContext(),datetime, Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception er) {
-
-        }
-        Lat = Lon = alti = speed = coarse = datetime = null;
-    }
+    Intent intent2;
     @Override
     public void onReceive(Context context, Intent intent) {
 
         // TODO Auto-generated method stub
         if (!Tools.LocationServiceRunning) {
-            BackgroundService.context = context;
-            Intent intent2 = new Intent(context, BackgroundService.class);
-            context.startService(intent2);
+            Tools.context = context;
+//            Intent intent2 = new Intent(context, BackgroundService.class);
+//            context.startService(intent2);
             Tools.LocationServiceRunning = true;
         }
-if(BackgroundService.mLocationManager!=null) {
-    Location l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-    if(l==null)
-        l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-    SaveLocation(l);
-}
+        if(intent2==null)
+        intent2 = new Intent(context, LocationService.class);
+        context.startService(intent2);
+//if(BackgroundService.mLocationManager!=null) {
+////    Location l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+////    if(l==null)
+////        l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+////    SaveLocation(l);
+//}
         AsyncCallWS task = new AsyncCallWS(context);
         //  task.execute();
         task.DoJob();
     if(!Tools.GpsState(context))
-        Tools.NotificationClass.Notificationm(context, "رهگیری","در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.","");
-    else
         Tools.NotificationClass.Notificationm(context, "رهگیری", "موقعیت مکانی شما خاموش است. لطفا روشن کنید.", "");
     }
 
@@ -157,7 +101,6 @@ if(BackgroundService.mLocationManager!=null) {
                 Map<String, String> params = new HashMap<>();
                 // the POST parameters
                 params.put("Data", Data);// "351520060796671");
-//                Toast.makeText(context,Data,Toast.LENGTH_LONG).show();
 
                 JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url,
                         new JSONObject(params), new Response.Listener<JSONObject>() {

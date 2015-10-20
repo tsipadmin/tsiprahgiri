@@ -21,6 +21,7 @@ public class DatabaseContracts {
         public static final String COLUMN_NAME_endTime = "endTime";
         public static final String COLUMN_NAME_interval = "interval";
         public static final String COLUMN_NAME_RunningAlarm = "RunningAlarm";
+        public static final String COLUMN_NAME_Accurate = "Accurate";
 
         private static final String COMMA_SEP = ",";
         public static final String SQL_CREATE_Table =
@@ -33,6 +34,7 @@ public class DatabaseContracts {
                         Settings.COLUMN_NAME_logo + " varchar(20) " + COMMA_SEP +
                         Settings.COLUMN_NAME_site + " varchar(20) " + COMMA_SEP +
                         Settings.COLUMN_NAME_tell + " varchar(20) " + COMMA_SEP +
+                        Settings.COLUMN_NAME_Accurate + " char(1) " + COMMA_SEP +
                         Settings.COLUMN_NAME_RunningAlarm + " INTEGER " + COMMA_SEP +
                         Settings.COLUMN_NAME_interval + " varchar(20) " +  " )";
 

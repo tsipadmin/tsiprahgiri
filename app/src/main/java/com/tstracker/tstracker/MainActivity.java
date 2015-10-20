@@ -113,8 +113,9 @@ public class MainActivity extends AppCompatActivity {
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, "14");
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, "07");
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_logo, logo);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_site, tell);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_tell, site);
+                            values.put(DatabaseContracts.Settings.COLUMN_NAME_site, site);
+                            values.put(DatabaseContracts.Settings.COLUMN_NAME_tell, tell);
+                            values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "h");
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, 5000);
                             // Insert the new row, returning the primary key value of the new row
                             long newRowId;
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                                 Tools.days= "0,1,2,3,4,5,6";
                                 Tools.startTime="07";
                                 Tools.EndTime="14";
+                                Tools.curAccurate="h";
                                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                                 startActivity(intent);
                                 txtResult.setText("");

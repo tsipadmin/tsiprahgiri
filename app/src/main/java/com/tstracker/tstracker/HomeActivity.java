@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.content.ContextCompat;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +17,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.provider.Settings;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -26,24 +27,25 @@ public class HomeActivity extends AppCompatActivity {
     protected void onStart(){
 super.onStart();
 
-        Tools.CheckGps(this);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 try {
-    setContentView(R.layout.activity_home);
 }
-catch (Exception er){
-    String vv="";
+        catch (Exception er){
+    int a=0;
 }
+
+        Tools.CheckGps(this);
+        setContentView(R.layout.activity_home);
         //Check if already alarmmanager is running
 
         dh = new DatabaseHelper(getApplicationContext());
 
         try {
             db = dh.getReadableDatabase();
-            String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_RunningAlarm};
+            String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_RunningAlarm,DatabaseContracts.Settings.COLUMN_NAME_Accurate};
             Cursor c = db.query(DatabaseContracts.Settings.TABLE_NAME, columns, "", null, "", "", "");
             c.moveToFirst();
             long itemId = 0;
@@ -61,6 +63,7 @@ catch (Exception er){
                 else
                     mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), Integer.valueOf(Tools.Interval), pi);
             }
+            Tools.lastAccurate = Tools.curAccurate=c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_Accurate));
         } catch (Exception er) {
 
         }
@@ -100,7 +103,7 @@ catch (Exception er){
         {
             AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             if(!isRunning) {
-                BackgroundService.context = this;
+                Tools.context = this;
                 Intent i = new Intent(getApplicationContext(), MyAlarmManager.class);
                 pi= PendingIntent.getBroadcast(getApplicationContext(), 0, i, 0);
                 mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), Long.valueOf(Tools.Interval), pi);
@@ -133,20 +136,23 @@ catch (Exception er){
     }
 
     public void btnMap_Click(View view) {
-        String url;
-        try {
-            if (Tools.SiteUrl.contains("http"))
-                url = Tools.SiteUrl;
-            else
-                url = "http://" + Tools.SiteUrl;
-            if (Tools.SiteUrl.length() < 1)
-                url = "http://www.tstracker.ir";
-        }
-        catch (Exception ex){
-            url = "http://www.tstracker.ir";
-        }
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
-        startActivity(browserIntent);
+//        String url;
+//        try {
+//            if (Tools.SiteUrl.contains("http"))
+//                url = Tools.SiteUrl;
+//            else
+//                url = "http://" + Tools.SiteUrl;
+//            if (Tools.SiteUrl.length() < 1)
+//                url = "http://www.tstracker.ir";
+//        }
+//        catch (Exception ex){
+//            url = "http://www.tstracker.ir";
+//        }
+//        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
+//        startActivity(browserIntent);
+
+        Intent i = new Intent(this,  MapsActivity.class);
+        startActivity(i);
     }
 
     public void NewsClick(View view) {
@@ -157,7 +163,4 @@ catch (Exception er){
         Toast.makeText(this, "غیر فعال است!", Toast.LENGTH_LONG).show();
     }
 
-    public void UpdateClick(View view) {
-        Toast.makeText(this, "غیر فعال است!", Toast.LENGTH_LONG).show();
-    }
 }

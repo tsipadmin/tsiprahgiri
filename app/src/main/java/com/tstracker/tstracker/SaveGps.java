@@ -15,12 +15,12 @@ public class SaveGps {
     DatabaseHelper dbh;
     SQLiteDatabase db;
     private Context CuContext;
-    private String CuBatteryCharge;
+    private static String CuBatteryCharge;
 
     public SaveGps(Context context, String Lat, String Lon, String alti, String speed, String curse, String datetime) {
         this.CuContext = context;
-        this.CuBatteryCharge = "0";
-        CuContext.registerReceiver(this.batteryInformationReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        CuContext.getApplicationContext().registerReceiver(this.batteryInformationReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         try {
 
             dbh = new DatabaseHelper(CuContext);

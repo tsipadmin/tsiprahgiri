@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.content.ContentValues;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class SettingActivity extends AppCompatActivity {
 
     DatabaseHelper dh;
-
+    boolean highaccurate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +41,8 @@ public class SettingActivity extends AppCompatActivity {
             String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_days,
                     DatabaseContracts.Settings.COLUMN_NAME_fromTime,
                     DatabaseContracts.Settings.COLUMN_NAME_endTime,
-                    DatabaseContracts.Settings.COLUMN_NAME_interval};
+                    DatabaseContracts.Settings.COLUMN_NAME_interval,
+                    DatabaseContracts.Settings.COLUMN_NAME_Accurate};
             Cursor c = db.query(DatabaseContracts.Settings.TABLE_NAME, columns, "", null, "", "", "");
             c.moveToFirst();
             String val = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_days));
@@ -65,8 +67,14 @@ public class SettingActivity extends AppCompatActivity {
             val = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_fromTime));
             ((EditText)findViewById(R.id.edittextAzSaat)).setText(val);
             val = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_interval));
-            val=String.valueOf(Integer.valueOf(val)/1000);
+            val=String.valueOf(Integer.valueOf(val) / 1000);
                     ((EditText) findViewById(R.id.edittextSendServerTime)).setText(val);
+            val = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_Accurate));
+            if(val.contains("l"))
+                ((RadioButton)findViewById(R.id.rdbLowAccourate)).setChecked(true);
+            else if(val.contains("h"))
+                ((RadioButton)findViewById(R.id.rdbHighAccurate)).setChecked(true);
+            highaccurate=((RadioButton)findViewById(R.id.rdbHighAccurate)).isChecked();
         } catch (Exception er) {
 
         }
@@ -129,6 +137,9 @@ public class SettingActivity extends AppCompatActivity {
                         Tools.startTime = params[7];
                         Tools.EndTime = params[8];
                         Tools.Interval = String.valueOf(Integer.valueOf(params[9]) * 1000);
+                        if(params.length>10)
+                        highaccurate=Boolean.valueOf(params[10]);
+
                         SQLiteDatabase db = dh.getReadableDatabase();
 // New value for one column
                         ContentValues values = new ContentValues();
@@ -136,6 +147,10 @@ public class SettingActivity extends AppCompatActivity {
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, Tools.startTime);
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, Tools.EndTime);
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, Tools.Interval);
+                        if(highaccurate)
+                            values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "h");
+                        else
+                            values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "l");
 
 // Which row to update, based on the ID
                         String selection = DatabaseContracts.Settings.COLUMN_NAME_ID + " = ?";
@@ -193,48 +208,42 @@ public class SettingActivity extends AppCompatActivity {
     }
 
 
-    public  void button_Click(View view){
-        String days="",fromTime,endTime,interval;
-
-        if(((CheckBox) findViewById(R.id.chkShabne)).isChecked())
-            days+="0,";
-        if(((CheckBox) findViewById(R.id.chkYekShabne)).isChecked())
-            days+="1,";
-        if(((CheckBox) findViewById(R.id.chkDoShabne)).isChecked())
-            days+="2,";
-        if(((CheckBox) findViewById(R.id.chkSeShabne)).isChecked())
-            days+="3,";
-        if(((CheckBox) findViewById(R.id.chkCharShabne)).isChecked())
-            days+="4,";
-        if(((CheckBox) findViewById(R.id.chkPanjShabne)).isChecked())
-            days+="5,";
-        if(((CheckBox) findViewById(R.id.chkJomeh)).isChecked())
-            days+="6";
-        fromTime=((EditText)findViewById(R.id.edittextAzSaat)).getText().toString();
-        endTime=((EditText)findViewById(R.id.edittextTaSaat)).getText().toString();
-        interval=String.valueOf(Integer.valueOf(((EditText) findViewById(R.id.edittextSendServerTime)).getText().toString())*1000);
-
-        SQLiteDatabase db = dh.getReadableDatabase();
-// New value for one column
-        ContentValues values = new ContentValues();
-        values.put(DatabaseContracts.Settings.COLUMN_NAME_days, days);
-        values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, fromTime);
-        values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, endTime);
-        values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, interval);
-
-// Which row to update, based on the ID
-        String selection = DatabaseContracts.Settings.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = { String.valueOf(1) };
-
-        int count = db.update(
-                DatabaseContracts.Settings.TABLE_NAME,
-                values,
-                selection,
-                selectionArgs);
-        Tools.days=days;
-        Tools.EndTime=endTime;
-        Tools.startTime=fromTime;
-        Tools.Interval=interval;
-        Toast.makeText(this,"اطلاعات ثبت شد.",Toast.LENGTH_LONG).show();
-    }
+//
+//    public void  HighAccurateChecked(View view){
+//        RadioButton cb=(RadioButton)findViewById(R.id.rdbHighAccurate);
+//        RadioButton rb=(RadioButton)findViewById(R.id.rdbLowAccourate);
+//        if(cb.isChecked()){
+//
+//            rb.setChecked(false);
+//UpdateAccurate("h");
+//        }
+//    }
+//    public void  LowAccurateChecked(View view){
+//        RadioButton cb=(RadioButton)findViewById(R.id.rdbHighAccurate);
+//        RadioButton rb=(RadioButton)findViewById(R.id.rdbLowAccourate);
+//        if(rb.isChecked()){
+//
+//            cb.setChecked(false);
+//
+//            UpdateAccurate("l");
+//        }
+//    }
+//
+//    private void UpdateAccurate(String accurate){
+//        SQLiteDatabase db = dh.getReadableDatabase();
+//// New value for one column
+//        ContentValues values = new ContentValues();
+//        values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, accurate);
+//
+//// Which row to update, based on the ID
+//        String selection = DatabaseContracts.Settings.COLUMN_NAME_ID + " = ?";
+//        String[] selectionArgs = { String.valueOf(1) };
+//
+//        int count = db.update(
+//                DatabaseContracts.Settings.TABLE_NAME,
+//                values,
+//                selection,
+//                selectionArgs);
+//        Tools.curAccurate=accurate;
+//    }
 }

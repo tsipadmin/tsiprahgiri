@@ -245,6 +245,26 @@
 
         </EditText>
 
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="دقت و مصرف شارژ بالا"
+            android:id="@+id/rdbHighAccurate"
+            android:layout_gravity="center_horizontal"
+            android:checked="false"
+            android:onClick="HighAccurateChecked"
+            android:enabled="false"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="دقت و مصرف شارژ پایین"
+            android:id="@+id/rdbLowAccourate"
+            android:layout_gravity="center_horizontal"
+            android:onClick="LowAccurateChecked"
+            android:nestedScrollingEnabled="false"
+            android:enabled="false"/>
+
     </LinearLayout>
 
 
