@@ -78,16 +78,14 @@ CreateLocationRequest();
         double coarse = 0;
         if (lastLocation != null) {
             coarse = java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
-
-            if (location.hasSpeed() || location.distanceTo(lastLocation) > 10 || coarse > 15) {
-                Tools.SaveLocation(location, coarse);
-                lastLocation = location;
-            }
+        } else
+            lastLocation = location;
+        if (location.hasSpeed() || location.distanceTo(lastLocation) > 10 || coarse > 15) {
+            Tools.SaveLocation(location, coarse);
+            lastLocation = location;
+            Toast.makeText(getApplicationContext(), Tools.curAccurate, Toast.LENGTH_LONG).show();
         }
-        //    Toast.makeText(getApplicationContext(),Tools.curAccurate , Toast.LENGTH_LONG).show();
-
-        Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری","در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.","");
-
+        Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
 
     @Override
