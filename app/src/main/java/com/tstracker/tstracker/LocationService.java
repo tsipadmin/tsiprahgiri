@@ -76,12 +76,13 @@ CreateLocationRequest();
     @Override
     public void onLocationChanged(Location location) {
         double coarse = 0;
-        if (lastLocation != null)
+        if (lastLocation != null) {
             coarse = java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
 
-        if(location.hasSpeed() || location.distanceTo(lastLocation)>10 || coarse>15) {
-          Tools.SaveLocation(location, coarse);
-          lastLocation = location;
+            if (location.hasSpeed() || location.distanceTo(lastLocation) > 10 || coarse > 15) {
+                Tools.SaveLocation(location, coarse);
+                lastLocation = location;
+            }
         }
         //    Toast.makeText(getApplicationContext(),Tools.curAccurate , Toast.LENGTH_LONG).show();
 
