@@ -28,6 +28,12 @@ public class HomeActivity extends AppCompatActivity {
 super.onStart();
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Tools.CheckGps(this);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +43,6 @@ try {
     int a=0;
 }
 
-        Tools.CheckGps(this);
         setContentView(R.layout.activity_home);
         //Check if already alarmmanager is running
 

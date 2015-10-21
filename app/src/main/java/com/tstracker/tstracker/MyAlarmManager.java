@@ -27,7 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MyAlarmManager extends BroadcastReceiver {
-
+    Calendar c;
+    int hour;
     Intent intent2;
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -39,8 +40,8 @@ public class MyAlarmManager extends BroadcastReceiver {
 //            context.startService(intent2);
             Tools.LocationServiceRunning = true;
         }
-        if(intent2==null)
-        intent2 = new Intent(context, LocationService.class);
+        if (intent2 == null)
+            intent2 = new Intent(context, LocationService.class);
         context.startService(intent2);
 //if(BackgroundService.mLocationManager!=null) {
 ////    Location l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -51,8 +52,21 @@ public class MyAlarmManager extends BroadcastReceiver {
         AsyncCallWS task = new AsyncCallWS(context);
         //  task.execute();
         task.DoJob();
-    if(!Tools.GpsState(context))
-        Tools.NotificationClass.Notificationm(context, "رهگیری", "موقعیت مکانی شما خاموش است. لطفا روشن کنید.", "");
+        c = Calendar.getInstance();
+        hour = c.get(Calendar.HOUR);
+        if (!Tools.GpsState(context)) {
+            if(hour>Integer.valueOf( Tools.startTime))
+            {
+                Tools.NotificationClass.Notificationm(context, "رهگیری", "موقعیت مکانی شما خاموش است. لطفا روشن کنید.", "");
+            }
+        }
+        else
+        {
+            if(hour>Integer.valueOf( Tools.EndTime))
+            {
+                Tools.NotificationClass.Notificationm(context, "رهگیری","برنامه رهگیری به کار خود پایان داد. می توانید موقعیت را خاموش کنید.", "");
+            }
+        }
     }
 
     static String url = "http://tstracker.ir/services/webbasedefineservice.asmx/SaveAvlMobile";

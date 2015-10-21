@@ -35,11 +35,12 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:id="@+id/imageView"
         android:src="@drawable/logo"
         android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/txtvDeviceRegistrationState" />
+        android:layout_alignRight="@+id/txtvDeviceRegistrationState"
+        android:layout_marginBottom="63dp" />
 
 
 </RelativeLayout>

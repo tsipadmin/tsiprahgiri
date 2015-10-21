@@ -73,18 +73,24 @@ CreateLocationRequest();
 
     }
     Location lastLocation;
+    double coarse,speed;
     @Override
     public void onLocationChanged(Location location) {
-        double coarse = 0;
+         coarse = 0;
+        speed=0;
         if (lastLocation != null) {
             coarse = java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
+        speed=location.distanceTo(lastLocation)/1000/1;//km/s
         } else
             lastLocation = location;
-        if (location.hasSpeed() || location.distanceTo(lastLocation) > 10 || coarse > 15) {
+        //String s=String.valueOf(speed) +"-"+ String.valueOf(location.distanceTo(lastLocation)) +"-"+ String.valueOf(coarse);
+
+        if (speed>0.2|| location.distanceTo(lastLocation) > 40 || coarse > 5) {
             Tools.SaveLocation(location, coarse);
-            lastLocation = location;
-            Toast.makeText(getApplicationContext(), Tools.curAccurate, Toast.LENGTH_LONG).show();
+          // Toast.makeText(getApplicationContext(),             s       , Toast.LENGTH_LONG).show();
+
         }
+        lastLocation = location;
         Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
 

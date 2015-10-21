@@ -147,11 +147,19 @@ public class SettingActivity extends AppCompatActivity {
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, Tools.startTime);
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, Tools.EndTime);
                         values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, Tools.Interval);
-                        if(highaccurate)
+                        if(highaccurate) {
+                          Tools.curAccurate="h";
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "h");
-                        else
+                            ((RadioButton)findViewById(R.id.rdbHighAccurate)).setChecked(true);
+                            ((RadioButton)findViewById(R.id.rdbLowAccourate)).setChecked(false);
+                        }
+                            else {
+                          Tools.curAccurate="l";
                             values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "l");
 
+                            ((RadioButton)findViewById(R.id.rdbHighAccurate)).setChecked(false);
+                            ((RadioButton)findViewById(R.id.rdbLowAccourate)).setChecked(true);
+                        }
 // Which row to update, based on the ID
                         String selection = DatabaseContracts.Settings.COLUMN_NAME_ID + " = ?";
                         String[] selectionArgs = {String.valueOf(1)};
