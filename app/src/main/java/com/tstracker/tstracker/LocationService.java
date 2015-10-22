@@ -67,7 +67,7 @@ CreateLocationRequest();
 
     }
     Location lastLocation;
-    float coarse,speed,distance;
+    float coarse,speed,distance,lastCoarse;
     long lasttime,curenttime;
     Calendar c;
     @Override
@@ -75,25 +75,26 @@ CreateLocationRequest();
 
         c = Calendar.getInstance();
         lasttime = 1;
-         coarse = 0;
-        curenttime=c.getTimeInMillis();
-        speed=0;
-        distance=-1;
+        lastCoarse = coarse = 0;
+        curenttime = c.getTimeInMillis();
+        speed = 0;
+        distance = -1;
         if (lastLocation != null) {
-            coarse = (float)java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
-            distance=location.distanceTo(lastLocation);
-        speed=distance/((curenttime-lasttime)/1000);//m/s
+            coarse = (float) java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
+            distance = location.distanceTo(lastLocation);
+            speed = distance / ((curenttime - lasttime) / 1000);//m/s
         } else {
             lastLocation = location;
         }
-        lasttime=curenttime;
+        lasttime = curenttime;
         String s = String.valueOf(speed) + "----" + String.valueOf(distance) + "-----" + String.valueOf(coarse);
         android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
 
-        if (speed>0.7|| distance> 2 || coarse > 5 || distance==-1) {
+        if (speed > 0.7 || distance > 2 || (coarse - lastCoarse) > 5 || (coarse - lastCoarse) < -5 || distance == -1) {
             location.setSpeed(speed);
             Tools.SaveLocation(location, coarse);
-          lastLocation = location;
+            lastLocation = location;
+            lastCoarse = coarse;
         }
         Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
