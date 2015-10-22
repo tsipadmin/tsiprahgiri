@@ -67,35 +67,47 @@ CreateLocationRequest();
 
     }
     Location lastLocation;
-    float coarse,speed,distance,lastCoarse;
+    int coarse,LastSpeed,speed,distance,Lastcoarse;
     long lasttime,curenttime;
     Calendar c;
     @Override
     public void onLocationChanged(Location location) {
-
         c = Calendar.getInstance();
         lasttime = 1;
-        lastCoarse = coarse = 0;
-        curenttime = c.getTimeInMillis();
-        speed = 0;
-        distance = -1;
+        coarse = 0;
+        curenttime=c.getTimeInMillis();
+        speed=0;
+        distance=-1;
         if (lastLocation != null) {
-            coarse = (float) java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
-            distance = location.distanceTo(lastLocation);
-            speed = distance / ((curenttime - lasttime) / 1000);//m/s
-        } else {
-            lastLocation = location;
+            coarse =(int) location.bearingTo(lastLocation);
+            distance=(int)location.distanceTo(lastLocation);
+            speed=(int)(distance/((curenttime-lasttime)/1000));//m/s
         }
-        lasttime = curenttime;
-        String s = String.valueOf(speed) + "----" + String.valueOf(distance) + "-----" + String.valueOf(coarse);
-        android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
+        else{
+            lastLocation=location;
+        }
 
-        if (speed > 0.7 || distance > 2 || (coarse - lastCoarse) > 5 || (coarse - lastCoarse) < -5 || distance == -1) {
+
+        if (
+                (speed == 0 && LastSpeed !=0) // Move and stop
+                        ||
+                        (speed > 0 && LastSpeed ==0) // Move after stop
+                        ||
+                        (distance > 50 ) // 50
+                        ||
+                        (Math.abs(Lastcoarse-coarse)>5) //
+                ) {
             location.setSpeed(speed);
             Tools.SaveLocation(location, coarse);
             lastLocation = location;
-            lastCoarse = coarse;
+            Lastcoarse = coarse;
+            lasttime=curenttime;
+            LastSpeed = speed;
+            String s = String.valueOf(speed) + "----" + String.valueOf(distance) + "-----" + String.valueOf(coarse);
+            android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
+
         }
+
         Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
 
