@@ -1,17 +1,12 @@
 package com.tstracker.tstracker;
 
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
@@ -21,8 +16,7 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.util.Calendar;
 
 /**
  * Created by ali on 10/17/15.
@@ -73,24 +67,34 @@ CreateLocationRequest();
 
     }
     Location lastLocation;
-    double coarse,speed;
+    float coarse,speed,distance;
+    long lasttime,curenttime;
+    Calendar c;
     @Override
     public void onLocationChanged(Location location) {
+
+        c = Calendar.getInstance();
+        lasttime = 1;
          coarse = 0;
+        curenttime=c.getTimeInMillis();
         speed=0;
+        distance=-1;
         if (lastLocation != null) {
-            coarse = java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
-        speed=location.distanceTo(lastLocation)/1000/1;//km/s
-        } else
+            coarse = (float)java.lang.Math.asin((location.getLongitude() - lastLocation.getLongitude()) / (location.getLatitude() - lastLocation.getLatitude()));
+            distance=location.distanceTo(lastLocation);
+        speed=distance/((curenttime-lasttime)/1000);//m/s
+        } else {
             lastLocation = location;
-        //String s=String.valueOf(speed) +"-"+ String.valueOf(location.distanceTo(lastLocation)) +"-"+ String.valueOf(coarse);
-
-        if (speed>0.2|| location.distanceTo(lastLocation) > 40 || coarse > 5) {
-            Tools.SaveLocation(location, coarse);
-          // Toast.makeText(getApplicationContext(),             s       , Toast.LENGTH_LONG).show();
-
         }
-        lastLocation = location;
+        lasttime=curenttime;
+        String s = String.valueOf(speed) + "----" + String.valueOf(distance) + "-----" + String.valueOf(coarse);
+        android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
+
+        if (speed>0.7|| distance> 2 || coarse > 5 || distance==-1) {
+            location.setSpeed(speed);
+            Tools.SaveLocation(location, coarse);
+          lastLocation = location;
+        }
         Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
 
