@@ -73,7 +73,7 @@ CreateLocationRequest();
     @Override
     public void onLocationChanged(Location location) {
         c = Calendar.getInstance();
-        lasttime = 1;
+        //lasttime = 1;
         coarse = 0;
         curenttime=c.getTimeInMillis();
         speed=0;
@@ -81,7 +81,7 @@ CreateLocationRequest();
         if (lastLocation != null) {
             coarse =(int) location.bearingTo(lastLocation);
             distance=(int)location.distanceTo(lastLocation);
-            speed=(int)(distance/((curenttime-lasttime)/1000));//m/s
+            speed=(int)(distance/((curenttime-lasttime)/1000)*3600);//km/h
         }
         else{
             lastLocation=location;
@@ -95,7 +95,7 @@ CreateLocationRequest();
                         ||
                         (distance > 50 ) // 50
                         ||
-                        (Math.abs(Lastcoarse-coarse)>5) //
+                        ( distance > 5 && Math.abs(Lastcoarse-coarse)>5 ) //
                 ) {
             location.setSpeed(speed);
             Tools.SaveLocation(location, coarse);
