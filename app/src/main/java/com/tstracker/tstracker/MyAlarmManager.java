@@ -29,7 +29,8 @@ import java.util.Map;
 public class MyAlarmManager extends BroadcastReceiver {
     Calendar c;
     int hour;
-    Intent intent2;
+    static Intent intent2;
+    static com.android.volley.RequestQueue queue;
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -145,8 +146,9 @@ public class MyAlarmManager extends BroadcastReceiver {
                     }
                 });
                 if (Data.length() > 1) {
-
-                    Volley.newRequestQueue(context).add(jsObjRequest);
+                    if(queue == null)
+                        queue = Volley.newRequestQueue(context);
+                    queue.add(jsObjRequest);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
