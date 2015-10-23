@@ -110,7 +110,7 @@ public class LocationService extends Service implements
                 "----" + String.valueOf(LastCoarse) +
                 "-----" + String.valueOf(coarse);
 
-        if (true ||
+        if (
                         (speed == 0 && LastSpeed !=0) // Move and stop
                         ||
                         (speed > 0 && LastSpeed ==0) // Move after stop
