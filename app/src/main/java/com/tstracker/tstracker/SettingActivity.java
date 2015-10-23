@@ -75,9 +75,12 @@ public class SettingActivity extends AppCompatActivity {
             else if(val.contains("h"))
                 ((RadioButton)findViewById(R.id.rdbHighAccurate)).setChecked(true);
             highaccurate=((RadioButton)findViewById(R.id.rdbHighAccurate)).isChecked();
+            c.close();
+            db.close();
         } catch (Exception er) {
 
         }
+        dh.close();
     }
 
     @Override

@@ -40,7 +40,7 @@ super.onStart();
 try {
 }
         catch (Exception er){
-    int a=0;
+        int a=0;
 }
 
         setContentView(R.layout.activity_home);
@@ -69,9 +69,12 @@ try {
                     mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), Integer.valueOf(Tools.Interval), pi);
             }
             Tools.lastAccurate = Tools.curAccurate=c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_Accurate));
+            c.close();
+            db.close();
         } catch (Exception er) {
 
         }
+        dh.close();
     }
 
     @Override
@@ -118,7 +121,7 @@ try {
 
                 dh = new DatabaseHelper(this);
                 db = dh.getWritableDatabase();
-  ContentValues values = new ContentValues();
+                ContentValues values = new ContentValues();
                 values.put(DatabaseContracts.Settings.COLUMN_NAME_RunningAlarm, 1);
                 String selection = DatabaseContracts.Settings.COLUMN_NAME_ID + " = ?";
                 String[] selectionArgs = {String.valueOf(1)};
@@ -127,6 +130,8 @@ try {
                         values,
                         selection,
                         selectionArgs);
+                db.close();
+                dh.close();
 
             } else{
 //                mgr.cancel(pi);

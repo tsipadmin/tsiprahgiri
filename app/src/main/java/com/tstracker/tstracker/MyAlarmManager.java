@@ -107,9 +107,11 @@ public class MyAlarmManager extends BroadcastReceiver {
                         }
                     } catch (Exception er) {
                     }
+                    c.close();
+                    db.close();
                 } catch (Exception er) {
                 }
-
+                dh.close();
                 if(Data.length()>1)
                     Data=Tools.GetImei(context)+"|"+Data;
                 Map<String, String> params = new HashMap<>();
@@ -127,6 +129,8 @@ public class MyAlarmManager extends BroadcastReceiver {
                                 SQLiteDatabase db = dh.getReadableDatabase();
                                 if(db.delete(DatabaseContracts.AVLData.TABLE_NAME, "", null)>0){
                                 }
+                                db.close();
+                                dh.close();
                             }
                         } catch (Exception er) {
 

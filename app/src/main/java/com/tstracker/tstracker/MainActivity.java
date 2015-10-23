@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 // txtResult.setText(er.getMessage());
                 imei = imei + "/0";
             }
+            c.close();
+            db.close();
             if (itemId < 1) {
                 mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, 5000);
             } else {
@@ -79,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (android.database.sqlite.SQLiteException er) {
             // txtResult.setText(er.getMessage());
         }
+        dh.close();
     }
 
     private static final int DISPLAY_DATA = 1;

@@ -35,9 +35,12 @@ public class BootAlarmManager extends BroadcastReceiver {
                     mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 5000, pi);
 
                 }
+                c.close();
+                db.close();
             }catch (Exception e) {
                 Toast.makeText(ctxt, e.getMessage(), Toast.LENGTH_LONG).show();
             }
+            dh.close();
 
         } catch (Exception e) {
             // TODO: handle exception

@@ -35,9 +35,11 @@ public class about extends AppCompatActivity {
 
             } catch (Exception er) {
             }
+            c.close();
+            db.close();
         } catch (Exception er) {
         }
-
+        dh.close();
     }
 
     @Override

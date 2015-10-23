@@ -26,7 +26,7 @@ public class LocationService extends Service implements
 
     GoogleApiClient mGoogleApiClient;
     FusedLocationProviderApi fusedLocationProviderApi ;
-    int  LOCATION_INTERVAL=3000;
+    int  LOCATION_INTERVAL=1000;
     static LocationRequest locationRequest;
 
     protected synchronized void buildGoogleApiClient() {
@@ -58,11 +58,8 @@ public class LocationService extends Service implements
                 Tools.curAccurate=c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_Accurate));
 
                 c.close();
-                c = null;
                 db.close();
-                db = null;
                 dh.close();
-                dh=null;
             }
             if ( Tools.curAccurate.contains("l")) {
                 locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -113,7 +110,7 @@ public class LocationService extends Service implements
                 "----" + String.valueOf(LastCoarse) +
                 "-----" + String.valueOf(coarse);
 
-        if (
+        if (true ||
                         (speed == 0 && LastSpeed !=0) // Move and stop
                         ||
                         (speed > 0 && LastSpeed ==0) // Move after stop

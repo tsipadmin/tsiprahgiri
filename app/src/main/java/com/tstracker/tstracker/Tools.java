@@ -115,14 +115,20 @@ public  static  boolean GpsState(Context contxt){
                 if (days.contains(String.valueOf(dayWeek)))//check day
                     if (hourOfDay < Integer.valueOf(EndTime) && hourOfDay >= Integer.valueOf(startTime))//check hour
                     {
+                        c.close();
+                        db.close();
+                        dh.close();
                         return datetime;
                     }
             } catch (Exception er) {
                 // txtResult.setText(er.getMessage());
             }
+            c.close();
+            db.close();
         } catch (Exception ex) {
 
         }
+        dh.close();
         return null;
     }
 

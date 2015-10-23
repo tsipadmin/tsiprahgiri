@@ -32,6 +32,8 @@ public class SaveGps {
 // Insert the new row, returning the primary key value of the new row
             long newRowId;
             newRowId = db.insert(DatabaseContracts.AVLData.TABLE_NAME, DatabaseContracts.AVLData.COLUMN_NAME_ID, values);
+            db.close();
+            dbh.close();
         } catch (Exception ioe) {
             throw new Error("Unable to create database");
         }
