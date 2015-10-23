@@ -84,7 +84,7 @@ public  static  boolean GpsState(Context contxt){
     }
 
 
-    private static String IsTimeToSend() {
+    private static String IsTimeToSend(long TimeMilliseconds ) {
         DatabaseHelper dh = new DatabaseHelper(Tools.context);
         SQLiteDatabase db;
         try {
@@ -100,7 +100,11 @@ public  static  boolean GpsState(Context contxt){
                 String startTime = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_fromTime));
 
                 Calendar cal = Calendar.getInstance();
-                Date date = cal.getTime();
+                Date date;
+                if(TimeMilliseconds ==0)
+                    date = cal.getTime();
+                else
+                    date = new Date(TimeMilliseconds);
                 String datetime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(date);
                 //(String) DateFormat.format("yyyy-MM-dd HH:mm:ss",c );
                 Integer dayWeek = cal.get(Calendar.DAY_OF_WEEK);
@@ -122,7 +126,7 @@ public  static  boolean GpsState(Context contxt){
         return null;
     }
 
-    public  static   void SaveLocation(Location location,double _corase){
+    public  static   void SaveLocation(Location location,int _corase){
 
         currentLocation=location;
         String Lat, Lon, alti, speed, coarse, datetime;
@@ -134,15 +138,14 @@ public  static  boolean GpsState(Context contxt){
             coarse = String.valueOf(_corase);
             if(coarse== "NaN")
                 coarse="0";
-            datetime = IsTimeToSend();
-
+            datetime = IsTimeToSend(location.getTime());
             if ( datetime != null  ) {
 
                 SaveGps s = new SaveGps(Tools.context, Lat, Lon, alti, speed, coarse, datetime);
 //              Toast.makeText(getApplicationContext(),datetime, Toast.LENGTH_LONG).show();
             }
         } catch (Exception er) {
-String g="";
+            String g="";
         }
         Lat = Lon = alti = speed = coarse = datetime = null;
     }

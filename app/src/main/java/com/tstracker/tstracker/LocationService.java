@@ -24,9 +24,9 @@ import java.util.Calendar;
 public class LocationService extends Service implements
         ConnectionCallbacks, OnConnectionFailedListener , com.google.android.gms.location.LocationListener{
 
-   GoogleApiClient mGoogleApiClient;
+    GoogleApiClient mGoogleApiClient;
     FusedLocationProviderApi fusedLocationProviderApi ;
-   int  LOCATION_INTERVAL=3000;
+    int  LOCATION_INTERVAL=3000;
     static LocationRequest locationRequest;
 
     protected synchronized void buildGoogleApiClient() {
@@ -36,12 +36,16 @@ public class LocationService extends Service implements
                 .addApi(LocationServices.API)
                 .build();
 
-CreateLocationRequest();
+        CreateLocationRequest();
         fusedLocationProviderApi = LocationServices.FusedLocationApi;
     }
     public void CreateLocationRequest(){
-            locationRequest = LocationRequest.create();
-
+            if(locationRequest != null)
+            {
+            }
+            else {
+                locationRequest = LocationRequest.create();
+            }
             locationRequest.setInterval(LOCATION_INTERVAL);
             locationRequest.setFastestInterval(LOCATION_INTERVAL);
             if(Tools.curAccurate==null) {
@@ -52,6 +56,13 @@ CreateLocationRequest();
                 Cursor c = db.query(DatabaseContracts.Settings.TABLE_NAME, columns, "", null, "", "", "");
                 c.moveToFirst();
                 Tools.curAccurate=c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_Accurate));
+
+                c.close();
+                c = null;
+                db.close();
+                db = null;
+                dh.close();
+                dh=null;
             }
             if ( Tools.curAccurate.contains("l")) {
                 locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -66,47 +77,59 @@ CreateLocationRequest();
     public void onConnectionSuspended(int s){
 
     }
-    Location lastLocation;
-    int coarse,LastSpeed,speed,distance,Lastcoarse;
+
+    Location lastLocation,lastSendLocation;
+    int coarse,LastSpeed,speed,distance,Senddistance, LastCoarse;
     long lasttime,curenttime;
     Calendar c;
     @Override
     public void onLocationChanged(Location location) {
         c = Calendar.getInstance();
-        //lasttime = 1;
-        coarse = 0;
         curenttime=c.getTimeInMillis();
+        coarse = 0;
         speed=0;
         distance=-1;
         if (lastLocation != null) {
-            coarse =(int) location.bearingTo(lastLocation);
+
+            coarse =(int) location.bearingTo(lastSendLocation);
+            Senddistance=(int)location.distanceTo(lastSendLocation);
+
             distance=(int)location.distanceTo(lastLocation);
-            speed=(int)(distance/((curenttime-lasttime)/1000)*3600);//km/h
+            double difTime = (curenttime - lasttime) / 1000.0;
+            speed = (int)( (distance*1.0) / difTime * 3.6); //KM/H
         }
         else{
-            lastLocation=location;
+            lastSendLocation = location;
+            LastCoarse = coarse;
+            LastSpeed = speed;
         }
 
+        lasttime=curenttime; // use calc current speed
+        lastLocation=location;
+
+        String s = String.valueOf(speed) +
+                "----" + String.valueOf(Senddistance) +
+                "----" + String.valueOf(distance) +
+                "----" + String.valueOf(LastCoarse) +
+                "-----" + String.valueOf(coarse);
 
         if (
-                (speed == 0 && LastSpeed !=0) // Move and stop
+                        (speed == 0 && LastSpeed !=0) // Move and stop
                         ||
                         (speed > 0 && LastSpeed ==0) // Move after stop
                         ||
-                        (distance > 50 ) // 50
+                        (Senddistance > 50 ) // 50
                         ||
-                        ( distance > 5 && Math.abs(Lastcoarse-coarse)>5 ) //
+                        ( speed >0 && Senddistance > 5 && Math.abs(LastCoarse -coarse)>10 ) //
                 ) {
+            s+="----- Send";
             location.setSpeed(speed);
-            Tools.SaveLocation(location, coarse);
-            lastLocation = location;
-            Lastcoarse = coarse;
-            lasttime=curenttime;
+            Tools.SaveLocation(location, (int)coarse);
+            lastSendLocation = location;
+            LastCoarse = coarse;
             LastSpeed = speed;
-            String s = String.valueOf(speed) + "----" + String.valueOf(distance) + "-----" + String.valueOf(coarse);
-            android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
-
         }
+        android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
 
         Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
@@ -136,14 +159,13 @@ CreateLocationRequest();
             fusedLocationProviderApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
         }
 
-
         super.onStartCommand(intent, flags, startId);
 
         return START_STICKY;
     }
     @Override
     public void onCreate() {
-buildGoogleApiClient();
+        buildGoogleApiClient();
         super.onCreate();
         mGoogleApiClient.connect();
     }
