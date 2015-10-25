@@ -4,6 +4,8 @@ package com.tstracker.tstracker;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.location.Geocoder;
+import android.location.Address;
 import android.location.LocationManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -15,6 +17,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import java.io.IOException;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -132,29 +136,52 @@ public  static  boolean GpsState(Context contxt){
         return null;
     }
 
-    public  static   void SaveLocation(Location location,int _corase){
+    public  static   void SaveLocation(Location location,int _corase,int _speed) {
 
-        currentLocation=location;
+        currentLocation = location;
         String Lat, Lon, alti, speed, coarse, datetime;
         try {
             Lat = String.valueOf(location.getLatitude());
             Lon = String.valueOf(location.getLongitude());
             alti = String.valueOf(location.getAltitude());
-            speed = String.valueOf(location.getSpeed());
+            speed = String.valueOf(_speed);
             coarse = String.valueOf(_corase);
-            if(coarse== "NaN")
-                coarse="0";
+            if (coarse == "NaN")
+                coarse = "0";
             datetime = IsTimeToSend(location.getTime());
-            if ( datetime != null  ) {
+            if (datetime != null) {
 
                 SaveGps s = new SaveGps(Tools.context, Lat, Lon, alti, speed, coarse, datetime);
 //              Toast.makeText(getApplicationContext(),datetime, Toast.LENGTH_LONG).show();
             }
         } catch (Exception er) {
-            String g="";
+            String g = "";
         }
         Lat = Lon = alti = speed = coarse = datetime = null;
     }
+    public static  String GetAddress(double latitude,double longitude){
+        String result="";
+        Geocoder geocoder = new Geocoder(context, new Locale("Fa"));
+        try {
+            List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addressList != null && addressList.size() > 0) {
+                Address address = addressList.get(0);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                    sb.append(address.getAddressLine(i)).append("\n");
+                }
+                sb.append(address.getLocality()).append("\n");
+                sb.append(address.getPostalCode()).append("\n");
+                sb.append(address.getCountryName());
+                result = sb.toString();
+            }
+        }
+        catch (IOException e) {
+            result= "Unable connect to Geocoder";
+        }
+        return result;
+    }
+
     public static class NotificationClass {
         public static void Notificationm(Context context,String Title,String Details,String packge){
             NotificationCompat.Builder mBuilder =

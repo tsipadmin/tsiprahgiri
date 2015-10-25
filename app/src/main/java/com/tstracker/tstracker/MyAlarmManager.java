@@ -29,12 +29,12 @@ import java.util.Map;
 public class MyAlarmManager extends BroadcastReceiver {
     Calendar c;
     int hour;
-    static Intent intent2;
-    static com.android.volley.RequestQueue queue;
+     Intent intent2;
+     com.android.volley.RequestQueue queue;
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        // TODO Auto-generated method stub
+       // TODO Auto-generated method stub
         if (!Tools.LocationServiceRunning) {
             Tools.context = context;
 //            Intent intent2 = new Intent(context, BackgroundService.class);

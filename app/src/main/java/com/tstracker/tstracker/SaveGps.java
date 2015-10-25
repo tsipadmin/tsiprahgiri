@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Address;
 import android.os.BatteryManager;
 import android.database.sqlite.SQLiteDatabase;
 /**
@@ -16,7 +17,8 @@ public class SaveGps {
     SQLiteDatabase db;
     private Context CuContext;
     private static String CuBatteryCharge;
-
+String _Address="";
+    String data;
     public SaveGps(Context context, String Lat, String Lon, String alti, String speed, String curse, String datetime) {
         this.CuContext = context;
 
@@ -25,8 +27,8 @@ public class SaveGps {
 
             dbh = new DatabaseHelper(CuContext);
             db = dbh.getWritableDatabase();
-
-            String data =  Lat + "," + Lon + "," + alti + "," + speed + "," + curse + "," + datetime + "," + CuBatteryCharge;
+            _Address=Tools.GetAddress(Double.valueOf(Lat), Double.valueOf(Lon));
+            data =  Lat + "," + Lon + "," + alti + "," + speed + "," + curse + "," + datetime + "," + CuBatteryCharge+","+_Address;
             ContentValues values = new ContentValues();
             values.put(DatabaseContracts.AVLData.COLUMN_NAME_Data, data);
 // Insert the new row, returning the primary key value of the new row

@@ -20,7 +20,7 @@ import android.widget.Toast;
 import android.provider.Settings;
 
 public class HomeActivity extends AppCompatActivity {
-
+    AlarmManager  mgr;
     DatabaseHelper dh;
     SQLiteDatabase db;
     @Override
@@ -37,17 +37,9 @@ super.onStart();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-try {
-}
-        catch (Exception er){
-        int a=0;
-}
 
         setContentView(R.layout.activity_home);
-        //Check if already alarmmanager is running
-
         dh = new DatabaseHelper(getApplicationContext());
-
         try {
             db = dh.getReadableDatabase();
             String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_RunningAlarm,DatabaseContracts.Settings.COLUMN_NAME_Accurate};
@@ -57,12 +49,12 @@ try {
             itemId = c.getLong(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_RunningAlarm));
             if (itemId == 1) {
                 ((ImageButton) findViewById(R.id.ibtnRun)).setBackground(ContextCompat.getDrawable(this, R.drawable.stop));
-                AlarmManager  mgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+             mgr= (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
                 isRunning = true;
-               Intent i = new Intent(this, MyAlarmManager.class);
-                PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_NO_CREATE);
+               Intent i = new Intent(getApplicationContext(), MyAlarmManager.class);
+                PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, i, PendingIntent.FLAG_NO_CREATE);
                 if (pi == null) {
-                   pi= PendingIntent.getBroadcast(this, 0, i, 0);
+                   pi= PendingIntent.getBroadcast(getApplicationContext(), 0, i, 0);
                     mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), Integer.valueOf(Tools.Interval), pi);
                 }
                 else
@@ -109,7 +101,7 @@ try {
     public void RunClick(View view) {
         try
         {
-            AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             if(!isRunning) {
                 Tools.context = this;
                 Intent i = new Intent(getApplicationContext(), MyAlarmManager.class);
@@ -146,21 +138,6 @@ try {
     }
 
     public void btnMap_Click(View view) {
-//        String url;
-//        try {
-//            if (Tools.SiteUrl.contains("http"))
-//                url = Tools.SiteUrl;
-//            else
-//                url = "http://" + Tools.SiteUrl;
-//            if (Tools.SiteUrl.length() < 1)
-//                url = "http://www.tstracker.ir";
-//        }
-//        catch (Exception ex){
-//            url = "http://www.tstracker.ir";
-//        }
-//        Intent browserIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
-//        startActivity(browserIntent);
-
         Intent i = new Intent(this,  MapsActivity.class);
         startActivity(i);
     }
