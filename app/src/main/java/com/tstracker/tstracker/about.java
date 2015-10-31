@@ -40,6 +40,7 @@ public class about extends AppCompatActivity {
         } catch (Exception er) {
         }
         dh.close();
+        dh=null;
     }
 
     @Override

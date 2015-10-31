@@ -1,8 +1,11 @@
 package com.tstracker.tstracker;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.android.volley.Request;
@@ -15,6 +18,7 @@ import com.android.volley.toolbox.Volley;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.IBinder;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -29,69 +33,86 @@ import java.util.Map;
 public class MyAlarmManager extends BroadcastReceiver {
     Calendar c;
     int hour;
-     Intent intent2;
-     com.android.volley.RequestQueue queue;
+     static com.android.volley.RequestQueue queue;
+    static boolean SendData;
+    static String IDSend="";
+    AsyncCallWS task;
+    public static boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) Tools.context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        try {
+            // TODO Auto-generated method stub
+            if (!Tools.LocationServiceRunning || !isMyServiceRunning(LocationService.class)) {
+                Tools.context = context;
+                Tools.LocationServiceRunning = true;
+            }
+            if(Tools.startTime == null || Tools.EndTime==null) {
+                DatabaseHelper dh = new DatabaseHelper(context);
+                SQLiteDatabase db;
+                db = dh.getReadableDatabase();
+                String[] columns = {DatabaseContracts.Settings.COLUMN_NAME_fromTime,DatabaseContracts.Settings.COLUMN_NAME_endTime};
+                Cursor c = db.query(DatabaseContracts.Settings.TABLE_NAME, columns, "", null, "", "", "");
+                c.moveToFirst();
+                Tools.startTime = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_fromTime));
+                Tools.EndTime = c.getString(c.getColumnIndexOrThrow(DatabaseContracts.Settings.COLUMN_NAME_endTime));
 
-       // TODO Auto-generated method stub
-        if (!Tools.LocationServiceRunning) {
-            Tools.context = context;
-//            Intent intent2 = new Intent(context, BackgroundService.class);
-//            context.startService(intent2);
-            Tools.LocationServiceRunning = true;
-        }
-        if (intent2 == null)
-            intent2 = new Intent(context, LocationService.class);
-        context.startService(intent2);
-//if(BackgroundService.mLocationManager!=null) {
-////    Location l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-////    if(l==null)
-////        l=BackgroundService.mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-////    SaveLocation(l);
-//}
-        AsyncCallWS task = new AsyncCallWS(context);
-        //  task.execute();
-        task.DoJob();
-        c = Calendar.getInstance();
-        hour = c.get(Calendar.HOUR);
-        if (!Tools.GpsState(context)) {
-            if(hour>Integer.valueOf( Tools.startTime))
-            {
-                Tools.NotificationClass.Notificationm(context, "رهگیری", "موقعیت مکانی شما خاموش است. لطفا روشن کنید.", "");
+                c.close();
+                db.close();
+                dh.close();
+                dh = null;
             }
-        }
-        else
-        {
-            if(hour>Integer.valueOf( Tools.EndTime))
-            {
-                Tools.NotificationClass.Notificationm(context, "رهگیری","برنامه رهگیری به کار خود پایان داد. می توانید موقعیت را خاموش کنید.", "");
+            if (task == null)
+                task = new AsyncCallWS();
+            task.execute();
+            c = Calendar.getInstance();
+            hour = c.get(Calendar.HOUR);
+            if (!Tools.GpsState(context)) {
+                if (hour > Integer.valueOf(Tools.startTime)) {
+                    Tools.NotificationClass.Notificationm(context, "رهگیری", "موقعیت مکانی شما خاموش است. لطفا روشن کنید.", "");
+                }
+            } else {
+                if (hour > Integer.valueOf(Tools.EndTime)) {
+                    Tools.NotificationClass.Notificationm(context, "رهگیری", "برنامه رهگیری به کار خود پایان داد. می توانید موقعیت را خاموش کنید.", "");
+                }
             }
+        } catch (Exception er) {
+
+            Toast.makeText(context,er.getMessage(),Toast.LENGTH_LONG).show();
         }
     }
 
     static String url = "http://tstracker.ir/services/webbasedefineservice.asmx/SaveAvlMobile";
 
+
     //Async Method
     private class AsyncCallWS extends AsyncTask<String, Void, String> {
-        Context context;
+
         public AsyncCallWS() {
-        }
-        public AsyncCallWS(Context c) {
-            this.context=c;
         }
        @Override
         protected String doInBackground(String... parameters) {
            return  DoJob();
        }
 
-         public String DoJob(){
+        public String DoJob(){
+            if(SendData)
+                return "";
+            SendData=true;
             String result = null;
             try {
 
                 //android.widget.Toast.makeText(context," hi from run", android.widget.Toast.LENGTH_LONG).show();
                 String Data  ="";
-                DatabaseHelper dh = new DatabaseHelper(context);
+                DatabaseHelper dh = new DatabaseHelper(Tools.context);
                 SQLiteDatabase db;
                 try {
                     db = dh.getReadableDatabase();
@@ -100,21 +121,31 @@ public class MyAlarmManager extends BroadcastReceiver {
                     c.moveToFirst();
                     long itemId = 0;
                     try {
-                        while (true) {
-                            Data += c.getString(c.getColumnIndexOrThrow(DatabaseContracts.AVLData.COLUMN_NAME_Data)) + "#";
-                            if (c.isLast())
-                                break;
-                            c.moveToNext();
-                        }
+                        int Counter=0;
+                        if(c.getCount() > 0)
+                            while (true || Counter < 20) {
+                                Counter++;
+                                Data += c.getString(c.getColumnIndexOrThrow(DatabaseContracts.AVLData.COLUMN_NAME_Data)) + "#";
+                                if(IDSend.length()>0)
+                                    IDSend+=',';
+                                IDSend +=c.getString(c.getColumnIndexOrThrow(DatabaseContracts.AVLData.COLUMN_NAME_ID));
+                                if (c.isLast())
+                                    break;
+                                c.moveToNext();
+                            }
                     } catch (Exception er) {
+                        SendData = false;
+                        return "";
+
                     }
                     c.close();
                     db.close();
                 } catch (Exception er) {
                 }
                 dh.close();
+                dh=null;
                 if(Data.length()>1)
-                    Data=Tools.GetImei(context)+"|"+Data;
+                    Data=Tools.GetImei(Tools.context)+"|"+Data;
                 Map<String, String> params = new HashMap<>();
                 // the POST parameters
                 params.put("Data", Data);// "351520060796671");
@@ -126,15 +157,18 @@ public class MyAlarmManager extends BroadcastReceiver {
                         try {
                             String data = response.getString("d");
                             if (data.contains("1")) {
-                                DatabaseHelper dh = new DatabaseHelper(context);
+                                DatabaseHelper dh = new DatabaseHelper(Tools.context);
                                 SQLiteDatabase db = dh.getReadableDatabase();
-                                if(db.delete(DatabaseContracts.AVLData.TABLE_NAME, "", null)>0){
+                                if(db.delete(DatabaseContracts.AVLData.TABLE_NAME, DatabaseContracts.AVLData.COLUMN_NAME_ID+ " in ("+IDSend+")", null)>0){
+                                    IDSend="";
                                 }
                                 db.close();
                                 dh.close();
+                                dh=null;
+                                SendData=false;
                             }
                         } catch (Exception er) {
-
+                            SendData=false;
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -142,12 +176,12 @@ public class MyAlarmManager extends BroadcastReceiver {
                     public void onErrorResponse(VolleyError error) {
 //                        Toast.makeText(context,error.getMessage(),Toast.LENGTH_LONG).show();
 //                        Tools.NotificationClass.Notificationm(context, "رهگیری", "");
-
+                        SendData=false;
                     }
                 });
                 if (Data.length() > 1) {
                     if(queue == null)
-                        queue = Volley.newRequestQueue(context);
+                        queue = Volley.newRequestQueue(Tools.context);
                     queue.add(jsObjRequest);
                 }
             } catch (Exception e) {
@@ -155,7 +189,6 @@ public class MyAlarmManager extends BroadcastReceiver {
             }
             return result;
         }
-
         @Override
         protected void onPostExecute(String result) {
 

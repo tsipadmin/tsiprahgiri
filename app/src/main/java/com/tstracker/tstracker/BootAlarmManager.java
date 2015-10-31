@@ -41,6 +41,7 @@ public class BootAlarmManager extends BroadcastReceiver {
                 Toast.makeText(ctxt, e.getMessage(), Toast.LENGTH_LONG).show();
             }
             dh.close();
+            dh=null;
 
         } catch (Exception e) {
             // TODO: handle exception

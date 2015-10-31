@@ -23,21 +23,19 @@ import java.util.Calendar;
 /**
  * Created by ali on 10/17/15.
  */
-public class LocationService extends IntentService implements
+public class LocationService extends Service implements
         ConnectionCallbacks, OnConnectionFailedListener , com.google.android.gms.location.LocationListener{
 
     GoogleApiClient mGoogleApiClient;
     FusedLocationProviderApi fusedLocationProviderApi ;
     int  LOCATION_INTERVAL=1000;
     static LocationRequest locationRequest;
+    int Counter = 0;
 
     public LocationService(){
-        super("LocationService");
-    }
-    @Override
-    protected void onHandleIntent(Intent intent) {
 
     }
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -69,6 +67,7 @@ public class LocationService extends IntentService implements
                 c.close();
                 db.close();
                 dh.close();
+                dh=null;
             }
             if ( Tools.curAccurate.contains("l")) {
                 locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -90,53 +89,57 @@ public class LocationService extends IntentService implements
     Calendar c;
     @Override
     public void onLocationChanged(Location location) {
-        c = Calendar.getInstance();
-        curenttime=c.getTimeInMillis();
-        coarse = 0;
-        speed=0;
-        distance=-1;
-        if (lastLocation != null) {
+        try {
+            c = Calendar.getInstance();
+            curenttime = c.getTimeInMillis();
+            coarse = 0;
+            speed = 0;
+            distance = -1;
+            if (lastLocation != null) {
 
-            coarse =(int) location.bearingTo(lastSendLocation);
-            Senddistance=(int)location.distanceTo(lastSendLocation);
+                coarse = (int) location.bearingTo(lastSendLocation);
+                Senddistance = (int) location.distanceTo(lastSendLocation);
 
-            distance=(int)location.distanceTo(lastLocation);
-            double difTime = (curenttime - lasttime) / 1000.0;
-            speed = (int)( (distance*1.0) / difTime * 3.6); //KM/H
+                distance = (int) location.distanceTo(lastLocation);
+                double difTime = (curenttime - lasttime) / 1000.0;
+                speed = (int) ((distance * 1.0) / difTime * 3.6); //KM/H
+            } else {
+                lastSendLocation = location;
+                LastCoarse = coarse;
+                LastSpeed = speed;
+            }
+
+            lasttime = curenttime; // use calc current speed
+            lastLocation = location;
+
+            Counter++;
+
+            if (
+                    (speed == 0 && LastSpeed != 0) // Move and stop
+                            ||
+                            (speed > 0 && LastSpeed == 0) // Move after stop
+                            ||
+                            (Senddistance > 50) // 50
+                            ||
+                            (speed > 0 && Senddistance > 5 && Math.abs(LastCoarse - coarse) > 10) //
+                    ) {
+                String s = String.valueOf(speed) +
+                        "----" + String.valueOf(Senddistance) +
+                        "----" + String.valueOf(distance) +
+                        "----" + String.valueOf(LastCoarse) +
+                        "-----" + String.valueOf(coarse);
+                s += "----- Send";
+                Tools.SaveLocation(location, coarse, speed);
+                lastSendLocation = location;
+                LastCoarse = coarse;
+                LastSpeed = speed;
+                android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
+            }
+
+            Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
+        } catch (Exception e) {
+String s=e.getMessage();
         }
-        else{
-            lastSendLocation = location;
-            LastCoarse = coarse;
-            LastSpeed = speed;
-        }
-
-        lasttime=curenttime; // use calc current speed
-        lastLocation=location;
-
-//        String s = String.valueOf(speed) +
-//                "----" + String.valueOf(Senddistance) +
-//                "----" + String.valueOf(distance) +
-//                "----" + String.valueOf(LastCoarse) +
-//                "-----" + String.valueOf(coarse);
-
-        if (
-                        (speed == 0 && LastSpeed !=0) // Move and stop
-                        ||
-                        (speed > 0 && LastSpeed ==0) // Move after stop
-                        ||
-                         (Senddistance > 50 ) // 50
-                        ||
-                        ( speed >0 && Senddistance > 5 && Math.abs(LastCoarse -coarse)>10 ) //
-                ) {
-//            s+="----- Send";
-            Tools.SaveLocation(location, coarse,speed);
-            lastSendLocation = location;
-            LastCoarse = coarse;
-            LastSpeed = speed;
-//            android.widget.Toast.makeText(getApplicationContext(), s, android.widget.Toast.LENGTH_LONG).show();
-        }
-
-        Tools.NotificationClass.Notificationm(getApplicationContext(), "رهگیری", "در حال ذخیره سازی اطلاعات مکانی شما برای ارسال به سرور.", "");
     }
 
     @Override
@@ -157,21 +160,27 @@ public class LocationService extends IntentService implements
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        super.onStartCommand(intent, flags, startId);
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+
        if(Tools.curAccurate!=null && Tools.lastAccurate!=null && Tools.curAccurate!= Tools.lastAccurate) {
-            fusedLocationProviderApi.removeLocationUpdates(mGoogleApiClient, this);
-            CreateLocationRequest();
+           fusedLocationProviderApi.removeLocationUpdates(mGoogleApiClient, this);
+            //CreateLocationRequest();
             fusedLocationProviderApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
         }
-        super.onStartCommand(intent, flags, startId);
-
-        return START_STICKY;
+  return START_STICKY;
     }
     @Override
     public void onCreate() {
-
-        buildGoogleApiClient();
         super.onCreate();
-        mGoogleApiClient.connect();
+// این کلاس فقط باید یکار ساخته شود اما با هر بار صدا زدن سرویس ایجاد میشود
+
+//        while(true)
+//        {
+//            int a=1;
+//        }
+
     }
 
 }

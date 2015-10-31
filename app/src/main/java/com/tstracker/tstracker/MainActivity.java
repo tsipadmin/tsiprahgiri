@@ -11,11 +11,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.content.Intent;
 import android.content.ContentValues;
+
+import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.auth.AccountChangeEventsRequest;
+
 import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +28,14 @@ public class MainActivity extends AppCompatActivity {
 
     TextView txtImei,txtResult;
     String imei,url,key,logo,site,tell;
+
     boolean RegisteredIMEI;
     DatabaseHelper dh;
+    Map<String, String> params;
+
+    SQLiteDatabase db;
+    static RequestQueue queue;
+    static boolean SendRequestToServer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             // txtResult.setText(er.getMessage());
         }
         dh.close();
+        dh=null;
     }
 
     private static final int DISPLAY_DATA = 1;
@@ -92,50 +103,59 @@ public class MainActivity extends AppCompatActivity {
             // Do task here
             if (msg.what == DISPLAY_DATA) {
                 url = "http://tstracker.ir/services/webbasedefineservice.asmx/CheckRegistration";
-                Map<String, String> params = new HashMap<>();
+               params = new HashMap<>();
                 // the POST parameters:
                 params.put("pData",imei);// "351520060796671");
-                JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url,
-                        new JSONObject(params), new Response.Listener<JSONObject>() {
+
+                JSONObject   jo1=new JSONObject(params);
+                JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, url,jo1   , new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
 
-                            String data = response.getString("d");
-                            key = new JSONObject(data).getString("key");
-                            logo = new JSONObject(data).getString("logo");
-                            site = new JSONObject(data).getString("site");
-                            tell = new JSONObject(data).getString("tell");
+                          String data= response.getString("d");
+                            JSONObject jo=new JSONObject(data);
+                            key = jo.getString("key");
+                            logo = jo.getString("logo");
+                            site =jo.getString("site");
+                            tell = jo.getString("tell");
 
-                            SQLiteDatabase db = dh.getWritableDatabase();
-                            // Create a new map of values, where column names are the keys
-                            ContentValues values = new ContentValues();
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_ID, 1);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_key, key);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_days, "0,1,2,3,4,5,6");
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, "14");
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, "07");
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_logo, logo);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_site, site);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_tell, tell);
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "h");
-                            values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, 5000);
-                            // Insert the new row, returning the primary key value of the new row
-                            long newRowId;
-                            newRowId = db.insert(DatabaseContracts.Settings.TABLE_NAME, "", values);
-                            if (newRowId > 0) {
-                                RegisteredIMEI = true;
-                                Tools.Interval="5000";
-                                Tools.days= "0,1,2,3,4,5,6";
-                                Tools.startTime="07";
-                                Tools.EndTime="14";
-                                Tools.curAccurate="h";
-                                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                                startActivity(intent);
-                                txtResult.setText("");
-                                if(key==null)
-                                    RegisteredIMEI=false;
+                            dh = new DatabaseHelper(getApplicationContext());
+                            if(key!=null) {
+                                db = dh.getWritableDatabase();
+
+                                // Create a new map of values, where column names are the keys
+                                ContentValues  values = new ContentValues();
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_ID, 1);
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_key, key);
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_days, "0,1,2,3,4,5,6");
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_endTime, "14");
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_fromTime, "07");
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_logo, logo);
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_site, site);
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_tell, tell);
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_Accurate, "h");
+                                values.put(DatabaseContracts.Settings.COLUMN_NAME_interval, 5000);
+                                // Insert the new row, returning the primary key value of the new row
+
+                               long newRowId = db.insert(DatabaseContracts.Settings.TABLE_NAME, "", values);
+                                if (newRowId > 0) {
+                                    SendRequestToServer = false;
+                                    RegisteredIMEI = true;
+                                    Tools.Interval = "5000";
+                                    Tools.days = "0,1,2,3,4,5,6";
+                                    Tools.startTime = "07";
+                                    Tools.EndTime = "14";
+                                    Tools.curAccurate = "h";
+                                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                                    startActivity(intent);
+                                    txtResult.setText("");
+                                }
+                                db.close();
+                                dh.close();
                             }
+                            else
+                                RegisteredIMEI = false;
                         } catch (Exception er) {
                             key = er.getMessage();
                         }
@@ -149,9 +169,22 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-                Volley.newRequestQueue(getApplicationContext()).add(jsObjRequest);
+                if(queue == null)
+                    queue = Volley.newRequestQueue(getApplicationContext());
+                queue.add(jsObjRequest);
+//                SendRequestToServer = true;
+//                int Counter=0;
+//                while( SendRequestToServer && Counter < 120 )
+//                {
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                    Counter++;
+//                }
                 if (!RegisteredIMEI)
-                    mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, 5000);
+                    mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, 10000);
 
             }
         }

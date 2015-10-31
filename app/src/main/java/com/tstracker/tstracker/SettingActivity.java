@@ -81,6 +81,7 @@ public class SettingActivity extends AppCompatActivity {
 
         }
         dh.close();
+        dh=null;
     }
 
     @Override
@@ -111,6 +112,7 @@ public class SettingActivity extends AppCompatActivity {
 
     static String urlConfig = "http://tstracker.ir/services/webbasedefineservice.asmx/GetMobileConfig";
     public void GetDetails() {
+
         Map<String, String> params = new HashMap<>();
         // the POST parameters
         params.put("IMEI", Tools.IMEI);// "351520060796671");
@@ -119,6 +121,8 @@ public class SettingActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject response) {
                 try {
+
+                    dh = new DatabaseHelper(getApplicationContext());
                     String data = response.getString("d");
                     if (data.length() > 1) {
                         Tools.days = "";
@@ -205,8 +209,10 @@ public class SettingActivity extends AppCompatActivity {
                         ((EditText) findViewById(R.id.edittextSendServerTime)).setText(val);
                         Toast.makeText(getApplicationContext(), "اطلاعات ثبت شد.", Toast.LENGTH_LONG).show();
                     }
-                } catch (Exception er) {
+                    dh.close();
 
+                } catch (Exception er) {
+                    Toast.makeText(getApplicationContext(), "خطایی رخ داده است."+er.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         }, new Response.ErrorListener() {
@@ -216,6 +222,7 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
         Volley.newRequestQueue(this).add(jsObjRequest);
+
     }
 
 

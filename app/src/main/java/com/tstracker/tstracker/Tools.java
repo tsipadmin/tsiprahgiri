@@ -122,6 +122,7 @@ public  static  boolean GpsState(Context contxt){
                         c.close();
                         db.close();
                         dh.close();
+                        dh=null;
                         return datetime;
                     }
             } catch (Exception er) {
@@ -133,6 +134,7 @@ public  static  boolean GpsState(Context contxt){
 
         }
         dh.close();
+        dh=null;
         return null;
     }
 
@@ -159,6 +161,9 @@ public  static  boolean GpsState(Context contxt){
         }
         Lat = Lon = alti = speed = coarse = datetime = null;
     }
+
+
+
     public static  String GetAddress(double latitude,double longitude){
         String result="";
         Geocoder geocoder = new Geocoder(context, new Locale("Fa"));
